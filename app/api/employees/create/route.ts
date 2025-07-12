@@ -12,6 +12,8 @@ import { Resend } from 'resend';
 import { InvitationEmail } from '@/components/emails/InvitationEmail';
 import React from 'react';
 
+export const runtime = 'nodejs'; // ← Ez fontos!
+
 // JAVÍTÁS: Ellenőrizzük, hogy az API kulcs be van-e állítva
 if (!process.env.RESEND_API_KEY) {
   console.error("Hiányzó Resend API kulcs! Az e-mail küldés nem fog működni.");

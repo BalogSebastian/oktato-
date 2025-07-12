@@ -12,6 +12,8 @@ import { WelcomeEmail } from '@/components/emails/WelcomeEmail';
 import React from 'react'; // <-- JAVÍTÁS: Importáljuk a React-et a típushoz
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+export const runtime = 'nodejs'; // ← Ez fontos!
+
 
 const formSchema = z.object({
   clientName: z.string().min(2, { message: "A cégnévnek legalább 2 karakter hosszúnak kell lennie." }),
