@@ -1,12 +1,11 @@
-// Fájl: app/admin/layout.tsx
-
+// FÁJL 4: app/admin/layout.tsx (JAVÍTVA - import útvonal)
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth"; // <-- VÁLTOZÁS
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Home, Users, Package2, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { UserNav } from "@/components/global/UserNav"; // <-- ÚJ IMPORT
+import { UserNav } from "@/components/global/UserNav";
 
 export default async function AdminDashboardLayout({
   children,
@@ -14,7 +13,6 @@ export default async function AdminDashboardLayout({
   children: React.ReactNode;
 }) {
   const session = await getServerSession(authOptions);
-
   if (!session || session.user?.role !== 'SUPER_ADMIN') {
     redirect('/login');
   }
@@ -56,7 +54,6 @@ export default async function AdminDashboardLayout({
               </div>
             </form>
           </div>
-          {/* JAVÍTÁS: Itt használjuk az új, központi menüt */}
           <UserNav />
         </header>
         <main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-gray-100/40 dark:bg-gray-800/40">

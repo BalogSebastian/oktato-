@@ -1,3 +1,4 @@
+// FÁJL 6: components/forms/NewClientForm.tsx (JAVÍTVA)
 "use client";
 
 import { useForm } from "react-hook-form";
@@ -23,7 +24,6 @@ import {
 import { toast } from "sonner";
 import { useState } from "react";
 
-// A Zod séma definiálja az űrlap mezőit és a validációs szabályokat.
 const formSchema = z.object({
   clientName: z.string().min(2, { message: "A név legalább 2 karakter hosszú legyen." }),
   adminEmail: z.string().email({ message: "Érvénytelen e-mail cím." }),
@@ -31,7 +31,6 @@ const formSchema = z.object({
   courseId: z.string().min(1, { message: "Válasszon egy oktatást." }),
 });
 
-// A séma alapján létrehozunk egy TypeScript típust.
 type NewClientFormValues = z.infer<typeof formSchema>;
 
 interface NewClientFormProps {
@@ -41,20 +40,16 @@ interface NewClientFormProps {
 export function NewClientForm({ courses }: NewClientFormProps) {
   const [isLoading, setIsLoading] = useState(false);
 
-  // A react-hook-form inicializálása a sémánkkal és az alapértelmezett értékekkel.
   const form = useForm<NewClientFormValues>({
     resolver: zodResolver(formSchema),
-    // FONTOS JAVÍTÁS: Az alapértelmezett értékeknek minden mezőt tartalmazniuk kell,
-    // ami a sémában szerepel, hogy a TypeScript típusok helyesek legyenek.
     defaultValues: {
       clientName: "",
       adminEmail: "",
       licenseCount: 1,
-      courseId: "", // Ez a sor lett hozzáadva a hiba javításához.
+      courseId: "",
     },
   });
 
-  // Az űrlap elküldésekor lefutó aszinkron függvény.
   async function onSubmit(values: NewClientFormValues) {
     setIsLoading(true);
     try {
@@ -86,7 +81,6 @@ export function NewClientForm({ courses }: NewClientFormProps) {
 
   return (
     <Form {...form}>
-      {/* A handleSubmit most már hiba nélkül fogadja az onSubmit függvényt. */}
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <FormField
           control={form.control}

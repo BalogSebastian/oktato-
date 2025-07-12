@@ -1,24 +1,23 @@
-// Fájl: app/admin/clients/[clientId]/page.tsx
-
+// FÁJL 3: app/admin/clients/[clientId]/page.tsx (JAVÍTVA - import útvonal)
 import dbConnect from "@/lib/dbConnect";
 import Client from "@/lib/models/Client.model";
 import User from "@/lib/models/User.model";
 import { IClient, IUser } from "@/lib/types";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth"; // <-- VÁLTOZÁS
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, Users, FileText, Mail } from "lucide-react";
+import { ArrowLeft, Users, FileText } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 interface ClientDetailPageProps {
-  params: {
+  params: Promise<{
     clientId: string;
-  };
+  }>;
 }
 
 export default async function ClientDetailPage({ params }: ClientDetailPageProps) {
@@ -27,16 +26,16 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
     redirect('/login');
   }
 
+  const { clientId } = await params;
+
   await dbConnect();
 
-  // Lekérjük a klienst és a hozzá tartozó admin felhasználó emailjét
-  const client: IClient | null = await Client.findById(params.clientId).populate({
+  const client: IClient | null = await Client.findById(clientId).populate({
     path: 'adminUser',
     model: User,
     select: 'email'
   });
 
-  // Ha nincs ilyen kliens, hibaoldalt mutatunk
   if (!client) {
     return (
       <div className="text-center mt-10">
@@ -51,7 +50,6 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
     );
   }
 
-  // Lekérjük az összes felhasználót (admin + munkavállalók), aki ehhez a céghez tartozik
   const employees: IUser[] = await User.find({ client: client._id }).sort({ role: 1, createdAt: -1 });
 
   const usedLicenses = employees.filter(e => e.role === 'USER').length;
@@ -60,7 +58,6 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
 
   return (
     <div className="flex flex-col gap-6">
-      {/* FEJLÉC VISSZA GOMBBAL */}
       <div>
         <Button asChild variant="outline" size="sm">
           <Link href="/admin/clients">
@@ -70,7 +67,6 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
         </Button>
       </div>
 
-      {/* ÜGYFÉL ADATAI ÉS STATISZTIKA */}
       <Card>
         <CardHeader>
           <CardTitle className="text-3xl font-bold">{client.name}</CardTitle>
@@ -99,7 +95,6 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
         </CardContent>
       </Card>
 
-      {/* MUNKAVÁLLALÓK TÁBLÁZATA */}
       <Card>
         <CardHeader>
           <CardTitle>Felhasználók</CardTitle>

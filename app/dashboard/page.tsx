@@ -1,7 +1,7 @@
 // Fájl: app/dashboard/page.tsx
 
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import dbConnect from "@/lib/dbConnect";
 import Client from "@/lib/models/Client.model";

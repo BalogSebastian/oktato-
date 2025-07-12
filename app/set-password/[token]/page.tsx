@@ -1,5 +1,4 @@
-// Fájl: app/set-password/[token]/page.tsx
-
+// FÁJL 4: app/set-password/[token]/page.tsx (JAVÍTVA - await params)
 import dbConnect from "@/lib/dbConnect";
 import User from "@/lib/models/User.model";
 import crypto from 'crypto';
@@ -7,32 +6,27 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { SetPasswordForm } from "@/components/forms/SetPasswordForm";
 
 interface SetPasswordPageProps {
-  params: {
+  params: Promise<{
     token: string;
-  };
+  }>;
 }
 
-// Token validálása a szerver oldalon
 async function validateToken(token: string) {
   await dbConnect();
-
-  // A token hashelt verzióját keressük az adatbázisban
   const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
-
   const user = await User.findOne({
     passwordResetToken: hashedToken,
-    passwordResetExpires: { $gt: Date.now() }, // Ellenőrizzük, hogy nem járt-e le
+    passwordResetExpires: { $gt: Date.now() },
   });
 
   if (!user) {
     return { isValid: false, error: "Ez a link érvénytelen vagy lejárt. Kérjen újat." };
   }
-
   return { isValid: true, error: null };
 }
 
 export default async function SetPasswordPage({ params }: SetPasswordPageProps) {
-  const { token } = params;
+  const { token } = await params;
   const { isValid, error } = await validateToken(token);
 
   return (
