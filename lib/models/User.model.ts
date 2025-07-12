@@ -10,6 +10,7 @@ const UserSchema = new Schema<IUser>({
     type: String,
     enum: ['SUPER_ADMIN', 'CLIENT_ADMIN', 'USER'],
     required: true,
+    
   },
   client: { type: Schema.Types.ObjectId, ref: 'Client' },
   createdAt: { type: Date, default: Date.now },
