@@ -22,7 +22,9 @@ import {
   Star,
   ArrowRight,
   Play,
-  Sparkles
+  Sparkles,
+  Clock,
+  Package
 } from "lucide-react";
 
 export default async function HomePage() {
@@ -58,6 +60,28 @@ export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black overflow-hidden font-['Inter',_'system-ui',_sans-serif]">
+      {/* Demo Banner */}
+      <div className="relative z-50 w-full bg-gradient-to-r from-red-900 via-red-800 to-red-900 border-b border-red-700 animate-pulse">
+        <div className="max-w-6xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-center gap-3 text-white">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse"></div>
+              <span className="font-semibold text-sm uppercase tracking-wider">Demo Verzió</span>
+            </div>
+            <div className="hidden sm:block w-px h-4 bg-red-400/50"></div>
+            <div className="flex items-center gap-2 text-sm">
+              <Clock className="h-4 w-4" />
+              <span>Július 17, 23:59-kor jön egy nagyobb csomag plugin bele</span>
+            </div>
+            <div className="hidden sm:block w-px h-4 bg-red-400/50"></div>
+            <div className="flex items-center gap-1">
+              <Package className="h-4 w-4 text-red-300" />
+              <span className="text-xs text-red-200">Új funkciók hamarosan!</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Animated background elements */}
       <div className="absolute inset-0 animate-pulse opacity-20">
         <div className="absolute inset-0 bg-gradient-to-r from-white/5 to-gray-300/5"></div>
@@ -69,7 +93,7 @@ export default async function HomePage() {
       <div className="absolute bottom-32 left-1/4 w-20 h-20 bg-white/8 rounded-full blur-xl animate-bounce [animation-delay:-1.5s]"></div>
       
       {/* Navigation */}
-      <nav className="relative z-50 flex items-center justify-between p-6 lg:px-8">
+      <nav className="relative z-40 flex items-center justify-between p-6 lg:px-8">
         <div className="flex items-center gap-2">
           <div className="relative">
             <Shield className="h-8 w-8 text-white" />
@@ -86,7 +110,7 @@ export default async function HomePage() {
       </nav>
 
       {/* Hero Section */}
-      <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-100px)] px-4 text-center">
+      <main className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-140px)] px-4 text-center">
         <div className="max-w-5xl mx-auto">
           {/* Badge */}
           <Badge className="mb-8 bg-white/10 text-white border-white/20 px-6 py-2 text-sm backdrop-blur-sm">
@@ -132,7 +156,7 @@ export default async function HomePage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
             <div className="text-center">
               <div className="text-4xl font-bold text-white mb-2">1000+</div>
-              <div className="text-gray-400">Siker faszom valami szó</div>
+              <div className="text-gray-400">Sikeres Felhasználó</div>
             </div>
             <div className="text-center">
               <div className="text-4xl font-bold text-white mb-2">50+</div>
