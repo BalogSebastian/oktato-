@@ -1,5 +1,4 @@
-// Fájl: app/api/employees/create/route.ts
-
+// app/api/employees/create/route.ts
 import { NextResponse } from 'next/server';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
@@ -8,18 +7,10 @@ import User from '@/lib/models/User.model';
 import Client from '@/lib/models/Client.model';
 import * as z from 'zod';
 import crypto from 'crypto';
-import { Resend } from 'resend';
-import { InvitationEmail } from '@/components/emails/InvitationEmail';
-import React from 'react';
+import { sendEmail } from '@/lib/services/sendgrid';
+import { invitationEmailTemplate } from '@/lib/emails/templates';
 
-export const runtime = 'nodejs'; // ← Ez fontos!
-
-// JAVÍTÁS: Ellenőrizzük, hogy az API kulcs be van-e állítva
-if (!process.env.RESEND_API_KEY) {
-  console.error("Hiányzó Resend API kulcs! Az e-mail küldés nem fog működni.");
-  console.error("Add hozzá a RESEND_API_KEY változót a .env.local fájlhoz.");
-}
-const resend = new Resend(process.env.RESEND_API_KEY);
+export const runtime = 'nodejs';
 
 const formSchema = z.object({
   email: z.string().email({ message: "Érvénytelen e-mail cím." }),
@@ -71,32 +62,27 @@ export async function POST(request: Request) {
 
     const setPasswordUrl = `${process.env.NEXTAUTH_URL}/set-password/${resetToken}`;
 
-    // JAVÍTÁS: Részletesebb hibakezelés és naplózás az e-mail küldésnél
+    // SendGrid email küldés
     try {
       console.log(`E-mail küldésének megkísérlése a(z) ${email} címre...`);
-      const { data, error } = await resend.emails.send({
-        from: 'Oktatási Platform <noreply@keno-rendezvenyek.com>',
-        to: [email],
+      
+      const emailHtml = invitationEmailTemplate(client.name, setPasswordUrl);
+      
+      const result = await sendEmail({
+        to: email,
         subject: `Meghívó a(z) ${client.name} oktatási felületére`,
-        react: InvitationEmail({
-          companyName: client.name,
-          setPasswordUrl: setPasswordUrl,
-        }) as React.ReactElement,
+        html: emailHtml
       });
 
-      if (error) {
-        // Ha a Resend API hibát ad vissza, azt naplózzuk és továbbdobjuk
-        console.error("Resend API hiba:", error);
-        throw new Error("Hiba történt az e-mail szolgáltatónál.");
-      }
+      console.log("E-mail sikeresen elküldve! ID:", result.messageId);
 
-      console.log("E-mail sikeresen elküldve! ID:", data?.id);
-
-    } catch (emailError) {
-      // Itt minden egyéb, a küldés során felmerülő hibát elkapunk
-      console.error("Váratlan hiba az e-mail küldése során:", emailError);
-      // Visszaküldünk egy konkrét hibaüzenetet a felhasználónak
-      return NextResponse.json({ message: 'A felhasználó létrejött, de a meghívó e-mailt nem sikerült elküldeni.' }, { status: 500 });
+    } catch (emailError: any) {
+      console.error("Hiba az e-mail küldése során:", emailError);
+      // Itt is dönthetünk: törölhetjük az új user-t, vagy megtartjuk
+      return NextResponse.json({ 
+        message: 'A felhasználó létrejött, de a meghívó e-mailt nem sikerült elküldeni.',
+        error: emailError.message 
+      }, { status: 500 });
     }
     
     return NextResponse.json({ message: 'Munkavállaló sikeresen meghívva!', user: newUser }, { status: 201 });

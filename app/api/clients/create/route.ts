@@ -1,5 +1,4 @@
-// Fájl: app/api/clients/create/route.ts
-
+// app/api/clients/create/route.ts
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/dbConnect';
 import User from '@/lib/models/User.model';
@@ -7,13 +6,10 @@ import Client from '@/lib/models/Client.model';
 import * as bcrypt from 'bcrypt';
 import { generate } from 'generate-password';
 import * as z from 'zod';
-import { Resend } from 'resend';
-import { WelcomeEmail } from '@/components/emails/WelcomeEmail';
-import React from 'react'; // <-- JAVÍTÁS: Importáljuk a React-et a típushoz
+import { sendEmail } from '@/lib/services/sendgrid';
+import { welcomeEmailTemplate } from '@/lib/emails/templates';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-export const runtime = 'nodejs'; // ← Ez fontos!
-
+export const runtime = 'nodejs';
 
 const formSchema = z.object({
   clientName: z.string().min(2, { message: "A cégnévnek legalább 2 karakter hosszúnak kell lennie." }),
@@ -32,6 +28,7 @@ export async function POST(request: Request) {
       const firstError = validation.error.errors[0].message;
       return NextResponse.json({ message: firstError }, { status: 400 });
     }
+
     const { clientName, adminEmail, licenseCount, courseId } = validation.data;
 
     const existingUser = await User.findOne({ email: adminEmail }).select('_id').lean();
@@ -41,7 +38,7 @@ export async function POST(request: Request) {
 
     const password = generate({ length: 12, numbers: true, symbols: true, strict: true });
     const hashedPassword = await bcrypt.hash(password, 10);
-    
+
     const session = await User.startSession();
     let newClient;
 
@@ -66,26 +63,25 @@ export async function POST(request: Request) {
     });
 
     session.endSession();
-    
-    // E-MAIL KÜLDÉS LOGIKA
+
+    // SendGrid email küldés
     try {
-      await resend.emails.send({
-        from: 'Oktatási Platform <noreply@keno-rendezvenyek.com>',
-        to: [adminEmail],
+      const loginUrl = `${process.env.NEXTAUTH_URL}/login`;
+      const emailHtml = welcomeEmailTemplate(clientName, adminEmail, password, loginUrl);
+      
+      await sendEmail({
+        to: adminEmail,
         subject: 'Sikeres regisztráció az Oktatási Platformon!',
-        // JAVÍTÁS: Explicit módon megmondjuk a TypeScriptnek, hogy ez egy React elem.
-        react: WelcomeEmail({
-          clientName: clientName,
-          adminEmail: adminEmail,
-          password: password,
-          loginUrl: `${process.env.NEXTAUTH_URL}/login`
-        }) as React.ReactElement,
+        html: emailHtml
       });
+      
       console.log(`Üdvözlő e-mail sikeresen elküldve a(z) ${adminEmail} címre.`);
     } catch (emailError) {
       console.error("Hiba az e-mail küldése során:", emailError);
+      // Itt dönthetünk: vagy visszagörgetjük az egész tranzakciót, 
+      // vagy csak logoljuk a hibát és folytatjuk
     }
-    
+
     return NextResponse.json({ message: 'Ügyfél sikeresen létrehozva és e-mail elküldve!', client: newClient }, { status: 201 });
 
   } catch (error: any) {
