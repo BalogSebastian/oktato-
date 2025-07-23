@@ -38,7 +38,7 @@ export interface IProgress extends Document {
     isCompleted: boolean;
 }
 
-// A Client és User interfészek változatlanok, de a teljesség kedvéért itt vannak
+// A Client interfész
 export interface IClient extends Document {
   _id: Schema.Types.ObjectId;
   name: string;
@@ -48,13 +48,38 @@ export interface IClient extends Document {
   createdAt: Date;
 }
 
+// MÓDOSÍTOTT: Az IUser interfész 'client' mezőjének típusa
 export interface IUser extends Document {
   _id: Schema.Types.ObjectId;
   email: string;
   password?: string;
   role: UserRole;
-  client?: Schema.Types.ObjectId;
+  // JAVÍTVA: A 'client' mező most már lehet ObjectId VAGY a populált IClient objektum.
+  client?: Schema.Types.ObjectId | IClient; 
   createdAt: Date;
   passwordResetToken?: string;
   passwordResetExpires?: Date;
+}
+// ÚJ: A Fizetés (Payment) interfésze
+export interface IPayment extends Document {
+  _id: Schema.Types.ObjectId;
+  client: Schema.Types.ObjectId; // Melyik kliens fizetett
+  user: Schema.Types.ObjectId;   // Melyik felhasználó (CLIENT_ADMIN) kezdeményezte
+  amount: number;                // A fizetett összeg (szimulált)
+  licensesAdded: number;         // Hány licenszt adtak hozzá
+  packageType: '5_LICENSES' | '10_LICENSES' | '15_LICENSES' | '20_LICENSES' | 'CUSTOM'; // Vásárolt csomag típusa
+  status: 'pending' | 'completed' | 'failed'; // Fizetés státusza
+  transactionId?: string;        // Külső tranzakció ID (pl. Stripe ID, ha lenne)
+  createdAt: Date;
+}
+
+// ÚJ: A Beállítás (Setting) interfésze
+export interface ISetting extends Document {
+  _id: Schema.Types.ObjectId;
+  key: string; // Pl. 'siteTitle', 'sendgridApiKey', 'defaultLicenseCount'
+  value: any; // A beállítás értéke (string, number, boolean, object)
+  description?: string; // Rövid leírás a beállításról
+  type: 'string' | 'number' | 'boolean' | 'json'; // A beállítás típusának segítése a UI-n
+  createdAt: Date;
+  updatedAt: Date;
 }

@@ -1,10 +1,10 @@
-// FÁJL 3: app/admin/clients/[clientId]/page.tsx (JAVÍTVA - import útvonal)
+// app/admin/clients/[clientId]/page.tsx
 import dbConnect from "@/lib/dbConnect";
 import Client from "@/lib/models/Client.model";
 import User from "@/lib/models/User.model";
 import { IClient, IUser } from "@/lib/types";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/lib/auth"; // <-- VÁLTOZÁS
+import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -13,6 +13,7 @@ import { Progress } from "@/components/ui/progress";
 import { ArrowLeft, Users, FileText } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { AddLicensesForm } from "@/components/admin/AddLicensesForm"; // ÚJ IMPORT
 
 interface ClientDetailPageProps {
   params: Promise<{
@@ -58,13 +59,14 @@ export default async function ClientDetailPage({ params }: ClientDetailPageProps
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
+      <div className="flex items-center justify-between">
         <Button asChild variant="outline" size="sm">
           <Link href="/admin/clients">
             <ArrowLeft className="mr-2 h-4 w-4" />
             Vissza az ügyféllistához
           </Link>
         </Button>
+        <AddLicensesForm clientId={client._id.toString()} clientName={client.name} /> {/* Itt is használjuk */}
       </div>
 
       <Card>

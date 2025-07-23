@@ -1,8 +1,9 @@
-// Fájl: lib/seed.ts
+// lib/seed.ts (Módosítás - Add hozzá a seedSuperAdmin funkció végéhez, vagy egy új seed funkcióba)
 
 import dbConnect from "./dbConnect";
 import User from "./models/User.model";
 import Course from "./models/Course.model";
+import Setting from "./models/Setting.model"; // <-- ÚJ IMPORT
 import * as bcrypt from "bcrypt";
 
 export async function seedSuperAdmin() {
@@ -22,7 +23,7 @@ export async function seedSuperAdmin() {
     }
   }
 
-  // JAVÍTÁS: Példa tanfolyam létrehozása az új, moduláris struktúrával
+  // Példa tanfolyam létrehozása (változatlan)
   const existingCourse = await Course.findOne({ title: "HACCP Mesterkurzus" });
   if (!existingCourse) {
     console.log("Nincs HACCP Mesterkurzus, létrehozom a példa adatot...");
@@ -49,5 +50,28 @@ export async function seedSuperAdmin() {
       ]
     });
     console.log("HACCP Mesterkurzus példa adatokkal létrehozva.");
+  }
+
+  // ÚJ: Alapértelmezett beállítások seedelése
+  const defaultSettings = [
+    { key: 'siteTitle', value: 'Oktatási Platform', description: 'Az oldal fő címe', type: 'string' },
+    { key: 'siteDescription', value: 'Online oktatási és képzési rendszer', description: 'Az oldal leírása', type: 'string' },
+    { key: 'contactEmail', value: 'info@platform.hu', description: 'Általános kapcsolattartó e-mail cím', type: 'string' },
+    { key: 'sendgridApiKey', value: process.env.SENDGRID_API_KEY || 'SG.XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX', description: 'SendGrid API kulcs e-mail küldéshez', type: 'string' },
+    { key: 'sendgridFromEmail', value: process.env.SENDGRID_FROM_EMAIL || 'noreply@platform.hu', description: 'E-mailek feladója', type: 'string' },
+    { key: 'sendgridFromName', value: process.env.SENDGRID_FROM_NAME || 'Oktatási Platform', description: 'E-mailek feladójának neve', type: 'string' },
+    { key: 'defaultUserRole', value: 'USER', description: 'Alapértelmezett szerepkör új felhasználóknak', type: 'string' },
+    { key: 'licensePackage5Price', value: 50, description: '5 licenszes csomag ára (Ft)', type: 'number' },
+    { key: 'licensePackage10Price', value: 90, description: '10 licenszes csomag ára (Ft)', type: 'number' },
+    { key: 'licensePackage15Price', value: 120, description: '15 licenszes csomag ára (Ft)', type: 'number' },
+    { key: 'licensePackage20Price', value: 150, description: '20 licenszes csomag ára (Ft)', type: 'number' },
+  ];
+
+  for (const setting of defaultSettings) {
+    const existingSetting = await Setting.findOne({ key: setting.key });
+    if (!existingSetting) {
+      await Setting.create(setting);
+      console.log(`Beállítás hozzáadva: ${setting.key}`);
+    }
   }
 }

@@ -1,12 +1,11 @@
-// Fájl: app/dashboard/page.tsx
-
+// app/dashboard/page.tsx
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import dbConnect from "@/lib/dbConnect";
 import Client from "@/lib/models/Client.model";
 import User from "@/lib/models/User.model";
-import Course from "@/lib/models/Course.model"; // <-- JAVÍTÁS: Ez a sor a megoldás!
+import Course from "@/lib/models/Course.model";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -15,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { AddEmployeeForm } from "@/components/forms/AddEmployeeForm";
+import { PurchaseForm } from "@/components/clients/PurchaseForm"; // <-- ÚJ IMPORT
 
 export default async function ClientDashboardPage() {
   const session = await getServerSession(authOptions);
@@ -25,7 +25,6 @@ export default async function ClientDashboardPage() {
 
   await dbConnect();
 
-  // A .populate() most már működni fog, mert a Course modell importálva van.
   const client = await Client.findById(session.user.client).populate('subscribedCourses');
   if (!client) {
     return <div>Hiba: A cég adatai nem találhatóak.</div>;
@@ -60,6 +59,17 @@ export default async function ClientDashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* ÚJ Kártya a licensz vásárláshoz */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Licensz Vásárlás</CardTitle>
+          <CardDescription>Vásároljon további licenszeket cége számára.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <PurchaseForm />
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
